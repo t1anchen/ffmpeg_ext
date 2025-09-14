@@ -693,3 +693,12 @@ Cargo.lock
 **/*.rs.bk
 
 # End of https://www.gitignore.io/api/rust
+
+# testing data
+*.mkv
+*.mp4
+*.avi
+*.mp3
+*.opus
+*.m4a
+*.aac

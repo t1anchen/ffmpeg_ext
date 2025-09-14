@@ -1,15 +1,18 @@
 use clap::Parser;
-use hello_world::{Opts, api_main};
+use ffmpeg_ext::{Opts, api_main};
 use tracing::info;
 use tracing_subscriber;
 
-fn main() {
+#[tokio::main]
+async fn main() -> anyhow::Result<(), anyhow::Error> {
   tracing_subscriber::fmt::init();
 
   let opts = Opts::parse();
 
   let start = std::time::Instant::now();
-  api_main(opts);
+  let _ = api_main(opts).await;
   let elapsed = start.elapsed();
-  info!("elapsed: {:?}", elapsed)
+  info!("elapsed: {:?}", elapsed);
+
+  Ok(())
 }
