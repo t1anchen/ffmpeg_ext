@@ -1,0 +1,14 @@
+# enforce to keep the eol in workspace same as the eol in git repository
+* text eol=lf
+
+# spec
+# https://datatracker.ietf.org/doc/html/rfc4180#section-2
+*.csv text eol=crlf
+
+# windows
+*.cmd text eol=crlf
+
+# binary
+*.epub binary
+*.png binary
+*.jpg binary

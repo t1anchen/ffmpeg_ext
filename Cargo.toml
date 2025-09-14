@@ -1,0 +1,16 @@
+[package]
+name = "hello-world"
+version = "0.1.0"
+authors = ["au9ustine <austin.shao@outlook.com>"]
+edition = "2024"
+
+[dependencies]
+# cli
+clap = { version = "4", features = ["derive"]}
+# logging
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+[features]
+default = []
+gui = []
