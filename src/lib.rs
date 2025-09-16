@@ -62,6 +62,12 @@ enum Commands {
 
     #[arg(long, default_value = ".png")]
     output_suffix: String,
+
+    #[arg(long, default_value = "-1")]
+    width_scale: i8,
+
+    #[arg(long, default_value = "-1")]
+    height_scale: i8,
   },
 }
 
@@ -100,6 +106,8 @@ impl Opts {
             output_format,
             video_frame,
             output_suffix,
+            width_scale,
+            height_scale,
           }) => {
             // misc and logging
             args.push("-nostdin".to_owned());
@@ -118,6 +126,12 @@ impl Opts {
             // video frame
             args.push("-vframes".to_owned());
             args.push(video_frame.to_string());
+            // scale
+            args.push("-vf".to_owned());
+            //   [2025-09-16T22:06:54+08:00] NEVER add double quotes in this
+            //   term, I was hallucinated by the hints from Perplexity.AI, and
+            //   it wasted my 2 hours to fix it.
+            args.push(format!("scale={}:{}", width_scale, height_scale));
             // default output path
             if output_path.is_none() {
               let mut output_name = vec![];
@@ -185,11 +199,16 @@ pub async fn api_main(mut opts: Opts) -> anyhow::Result<()> {
 
   if opts.borrow().dryrun {
     info!("{:?}", opts);
-    info!("{:?}", opts.borrow().to_args());
+    info!(
+      "{} {}",
+      opts.borrow().program.clone(),
+      opts.borrow().to_args().clone().join(" ")
+    );
     return Ok(());
   }
 
   let ffmpeg_args = opts.borrow().to_args();
+  debug!("ffmpeg_args: {:?}", ffmpeg_args.clone());
 
   let mut engine = Command::new(opts.borrow().program.clone())
     .args(&ffmpeg_args)
@@ -228,7 +247,7 @@ mod tests {
       dryrun: false,
     };
     let actual = opts.to_args().join(" ");
-    let expected = "-i /path/from /path/to";
+    let expected = "-hide_banner -i /path/from /path/to";
     assert_eq!(actual, expected);
   }
 }
