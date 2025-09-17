@@ -1,0 +1,14 @@
+on:
+  release:
+    types: [created]
+
+name: Release Event
+jobs:
+  generate:
+    name: create release-artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout master version
+        uses: actions/checkout@master
+      - name: Generate the artifacts
+        
