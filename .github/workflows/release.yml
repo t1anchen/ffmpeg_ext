@@ -20,3 +20,5 @@ jobs:
           files: "target/release/ffmpeg_ext"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+permissions:
+  contents: write
