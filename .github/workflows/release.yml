@@ -1,14 +1,22 @@
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+      - "v*.*.*"
 
 name: Release Event
 jobs:
-  generate:
+  build:
     name: create release-artifacts
     runs-on: ubuntu-latest
     steps:
       - name: Checkout master version
         uses: actions/checkout@master
       - name: Generate the artifacts
-        
+        run: |
+          cargo build --release
+      - name: upload binary to github release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: "target/release/ffmpeg_ext"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
