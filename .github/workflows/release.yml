@@ -6,7 +6,7 @@ on:
 name: Release Event
 jobs:
   build:
-    name: create release-artifacts
+    name: Releasing Linux amd64
     runs-on: ubuntu-latest
     steps:
       - name: Checkout master version

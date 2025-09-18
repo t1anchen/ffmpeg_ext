@@ -1,0 +1,16 @@
+on:
+  workflow_call:
+    inputs:
+      platform:
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ${{ inputs.platform }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build dev
+        run: cargo build --verbose
+      - name: Testing
+        run: cargo test --verbose
