@@ -8,7 +8,8 @@ use tokio::{
 };
 use tracing::{debug, info};
 
-pub mod hello;
+pub mod chrono;
+pub mod duration;
 
 #[derive(Debug, Clone, Parser, Default)]
 #[command(version, about, long_about = None)]
