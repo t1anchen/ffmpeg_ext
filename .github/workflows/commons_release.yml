@@ -1,13 +1,17 @@
 on:
   workflow_call:
     inputs:
-      platform:
+      platform_env:
+        required: true
+        type: string
+      platform_name:
         required: true
         type: string
 
+
 jobs:
   build:
-    name: Releasing Linux amd64
+    name: Releasing ${{ inputs.platform_name }}
     runs-on: ${{ inputs.platform }}
     steps:
       - name: Checkout master version
@@ -15,11 +19,20 @@ jobs:
       - name: Generate the artifacts
         run: |
           cargo build --release
-      - name: upload binary to github release
-        uses: softprops/action-gh-release@v2
+      # [2025-09-19T23:06:43+08:00] this job cannot upload multiple artifacts to
+      # the same release. Temporarily replace this job with offical
+      # upload-artifact job for stashing but release in manual way
+      #
+      # - name: upload binary to github release
+      #   uses: softprops/action-gh-release@v2
+      #   with:
+      #     files: "target/release/ffmpeg_ext"
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: upload binary to artifacts
+        uses: actions/upload-artifact@v4
         with:
-          files: "target/release/ffmpeg_ext"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: ffmpeg_ext-${{ github.ref_name }}-${{ platform_name }}
+          path: target/release/ffmpeg_ext
 permissions:
   contents: write

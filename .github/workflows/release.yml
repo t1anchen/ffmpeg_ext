@@ -8,14 +8,17 @@ jobs:
   release-ubuntu:
     uses: ./.github/workflows/commons_release.yml
     with:
-      platform: ubuntu-latest
+      platform_env: ubuntu-latest
+      platform_name: linux-amd64
   release-windows:
     uses: ./.github/workflows/commons_release.yml
     with:
-      platform: windows-latest
+      platform_env: windows-latest
+      platform_name: windows-amd64
   release-macos:
     uses: ./.github/workflows/commons_release.yml
     with:
-      platform: macos-latest
+      platform_env: macos-latest
+      platform_name: macos-amd64
 permissions:
   contents: write
