@@ -12,7 +12,7 @@ on:
 jobs:
   build:
     name: Releasing ${{ inputs.platform_name }}
-    runs-on: ${{ inputs.platform }}
+    runs-on: ${{ inputs.platform_env }}
     steps:
       - name: Checkout master version
         uses: actions/checkout@master
@@ -32,7 +32,7 @@ jobs:
       - name: upload binary to artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ffmpeg_ext-${{ github.ref_name }}-${{ platform_name }}
+          name: ffmpeg_ext-${{ github.ref_name }}-${{ inputs.platform_name }}
           path: target/release/ffmpeg_ext
 permissions:
   contents: write
