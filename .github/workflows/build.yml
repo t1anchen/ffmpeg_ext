@@ -11,14 +11,14 @@ env:
 
 jobs:
   build-ubuntu:
-    uses: ./build.template.yml
+    uses: ./commons_build.yml
     with:
       platform: ubuntu-latest
   build-windows:
-    uses: ./build.template.yml
+    uses: ./commons_build.yml
     with:
       platform: windows-latest
   build-macos:
-    uses: ./build.template.yml
+    uses: ./commons_build.yml
     with:
       platform: macos-latest
