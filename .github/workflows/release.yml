@@ -5,20 +5,15 @@ on:
 
 name: Release Event
 jobs:
-  build:
-    name: Releasing Linux amd64
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout master version
-        uses: actions/checkout@master
-      - name: Generate the artifacts
-        run: |
-          cargo build --release
-      - name: upload binary to github release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: "target/release/ffmpeg_ext"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-permissions:
-  contents: write
+  release-ubuntu:
+    uses: ./.github/workflows/commons_release.yml
+    with:
+      platform: ubuntu-latest
+  release-windows:
+    uses: ./.github/workflows/commons_release.yml
+    with:
+      platform: windows-latest
+  release-macos:
+    uses: ./.github/workflows/commons_release.yml
+    with:
+      platform: macos-latest
