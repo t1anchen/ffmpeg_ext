@@ -17,3 +17,5 @@ jobs:
     uses: ./.github/workflows/commons_release.yml
     with:
       platform: macos-latest
+permissions:
+  contents: write
