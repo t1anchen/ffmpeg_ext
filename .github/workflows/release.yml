@@ -3,7 +3,7 @@ on:
     tags:
       - "v*.*.*"
 
-name: Release Event
+name: Release
 jobs:
   release-ubuntu:
     uses: ./.github/workflows/commons_release.yml
@@ -23,5 +23,25 @@ jobs:
       platform_env: macos-latest
       platform_name: macos-amd64
       artifact_path: target/release/ffmpeg_ext
+  release:
+    runs-on: ubuntu-latest
+    needs: [release-ubuntu, release-windows, release-macos]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download linux artifact
+        uses: actions/download-artifact@v5
+        with:
+          pattern: ffmpeg_ext-*-${{ github.ref_name }}
+          path: .
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ffmpeg_ext-linux-amd64-${{ github.ref_name }}.zip
+            ffmpeg_ext-windows-amd64-${{ github.ref_name }}.zip
+            ffmpeg_ext-macos-amd64-${{ github.ref_name }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 permissions:
   contents: write

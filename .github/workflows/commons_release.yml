@@ -14,7 +14,7 @@ on:
 
 jobs:
   build:
-    name: Releasing ${{ inputs.platform_name }}
+    name: Building ${{ inputs.platform_name }} release
     runs-on: ${{ inputs.platform_env }}
     steps:
       - name: Checkout master version
@@ -35,7 +35,7 @@ jobs:
       - name: upload binary to artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ffmpeg_ext-${{ github.ref_name }}-${{ inputs.platform_name }}
+          name: ffmpeg_ext-${{ inputs.platform_name }}-${{ github.ref_name }}
           path: ${{ inputs.artifact_path }}
 permissions:
   contents: write
