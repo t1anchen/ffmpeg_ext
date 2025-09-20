@@ -10,15 +10,18 @@ jobs:
     with:
       platform_env: ubuntu-latest
       platform_name: linux-amd64
+      artifact_path: target/release/ffmpeg_ext
   release-windows:
     uses: ./.github/workflows/commons_release.yml
     with:
       platform_env: windows-latest
       platform_name: windows-amd64
+      artifact_path: target/release/ffmpeg_ext.exe
   release-macos:
     uses: ./.github/workflows/commons_release.yml
     with:
       platform_env: macos-latest
       platform_name: macos-amd64
+      artifact_path: target/release/ffmpeg_ext
 permissions:
   contents: write

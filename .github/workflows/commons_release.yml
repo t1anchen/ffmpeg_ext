@@ -7,6 +7,9 @@ on:
       platform_name:
         required: true
         type: string
+      artifact_path:
+        required: true
+        type: string
 
 
 jobs:
@@ -33,6 +36,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ffmpeg_ext-${{ github.ref_name }}-${{ inputs.platform_name }}
-          path: target/release/ffmpeg_ext
+          path: ${{ inputs.artifact_path }}
 permissions:
   contents: write
