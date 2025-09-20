@@ -33,7 +33,6 @@ jobs:
         with:
           pattern: ffmpeg_ext-*-${{ github.ref_name }}
           path: .
-          merge-multiple: true
       - name: Check downloaded
         run: ls -R .
       - name: Create release
