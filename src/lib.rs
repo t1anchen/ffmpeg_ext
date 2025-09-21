@@ -10,6 +10,7 @@ use tracing::{debug, info};
 
 pub mod chrono;
 pub mod duration;
+pub mod engine;
 pub mod media;
 
 #[derive(Debug, Clone, Parser, Default)]

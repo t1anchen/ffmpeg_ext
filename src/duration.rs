@@ -33,7 +33,7 @@ impl From<&Opts> for Duration {
         }
       }
     });
-    Duration { secs: 0 }
+    Duration { secs: total_secs }
   }
 }
 
