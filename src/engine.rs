@@ -5,7 +5,7 @@ use tokio::{
   process::Command,
 };
 
-pub async fn execute(
+pub async fn async_execute(
   program: &str,
   args: Vec<String>,
 ) -> impl Stream<Item = io::Result<String>> {
@@ -33,8 +33,9 @@ mod tests {
   use tokio_stream::StreamExt;
 
   #[tokio::test]
+  #[ignore = "ffmpeg is required"]
   async fn execute_testing() {
-    let stream = execute("ffmpeg", vec!["-h".to_owned()]).await;
+    let stream = async_execute("ffmpeg", vec!["-h".to_owned()]).await;
     tokio::pin!(stream);
     let mut actual = false;
     while let Some(Ok(line)) = stream.next().await {
