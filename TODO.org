@@ -12,6 +12,14 @@
 
 ** [#3] partition by start time, duration
 
+** [#3] croping and interpolate frames from lower section of screen
+
+- Note taken on [2025-10-01 Wed 13:18:01+08:00] \\
+  Original command line
+
+  #+begin_src
+  ffmpeg -i <input_file> -vf "crop=iw:ih/3:0:2*ih/3,select='gt(scene,0.1)',showinfo" -vsync vfr output/frame_%04d.png
+  #+end_src
 * Refactor
 
 * Documentation
