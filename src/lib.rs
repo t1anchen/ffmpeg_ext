@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use anyhow::Ok;
 use clap::Parser;
 use tokio::{
@@ -22,10 +24,10 @@ pub struct Opts {
   pub gui: bool,
 
   #[arg(long)]
-  pub input_path: Option<String>,
+  pub input_path: Option<PathBuf>,
 
   #[arg(long)]
-  pub output_path: Option<String>,
+  pub output_path: Option<PathBuf>,
 
   #[command(subcommand)]
   pub action: Option<Commands>, // 现在引用自 commands 模块
@@ -44,16 +46,18 @@ impl Opts {
       "ffmpeg" => {
         args.push("-hide_banner".into());
         if let Some(ref p) = self.input_path {
-          args.extend(vec!["-i".into(), p.clone()]);
+          args.extend(vec!["-i".into(), p.display().to_string()]);
         }
         if let Some(ref action) = self.action {
           action.build_args(&mut args);
         }
-        // 这里可以后续加入 output_path 的处理逻辑
+        if let Some(ref p) = self.output_path {
+          args.push(p.display().to_string());
+        }
       }
       "scenedetect" => {
         if let Some(ref p) = self.input_path {
-          args.extend(vec!["--input".into(), p.clone()]);
+          args.extend(vec!["--input".into(), p.display().to_string()]);
         }
         if let Some(ref action) = self.action {
           action.build_args(&mut args);
@@ -99,6 +103,8 @@ pub async fn api_main(mut opts: Opts) -> anyhow::Result<()> {
 
 #[cfg(test)]
 mod tests {
+  use std::path::PathBuf;
+
   use crate::Opts;
 
   #[test]
@@ -112,8 +118,8 @@ mod tests {
       program: "ffmpeg".to_owned(),
       gui: false,
       verbose: false,
-      input_path: Some("/path/from".to_owned()),
-      output_path: Some("/path/to".to_owned()),
+      input_path: Some("/path/from".into()),
+      output_path: Some("/path/to".into()),
       action: None,
       dryrun: false,
     };
