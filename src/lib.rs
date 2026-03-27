@@ -11,6 +11,8 @@ use tracing::{debug, info};
 pub mod chrono;
 pub mod commands;
 pub mod duration;
+pub mod engine;
+pub mod media;
 
 use crate::commands::{ArgsBuilder, Commands};
 
