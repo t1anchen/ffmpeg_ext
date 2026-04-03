@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "deny": [
+      "Read"
+    ],
+    "allow": [
+      "Read(src/**/*.rs)",
+      "Read(Cargo.toml)"
+    ]
+  }
+}
