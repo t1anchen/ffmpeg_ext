@@ -34,6 +34,10 @@ The project is organized around these core modules in `src/`:
 
 ## Common Commands
 
+## Installed CLI tools
+- **ripgrep (rg)** is installed — **always prefer over grep** for all code/text searches
+- **fd** is installed — prefer over find for file discovery
+
 ### Build
 ```bash
 cargo build
