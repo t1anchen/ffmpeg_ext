@@ -38,6 +38,8 @@ The project is organized around these core modules in `src/`:
 - **ripgrep (rg)** is installed — **always prefer over grep** for all code/text searches
 - **fd** is installed — prefer over find for file discovery
 
+if you're working on powershell, use powershell tool rather than posix bash.
+
 ### Build
 ```bash
 cargo build

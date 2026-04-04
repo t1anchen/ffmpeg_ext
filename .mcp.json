@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "chroma": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "chroma-mcp",
+        "--client-type",
+        "persistent",
+        "--data-dir",
+        "./var/chroma"
+      ],
+      "autoStart": true,
+      "stopOnExit": true,
+      "env": {}
+    }
+  }
+}
