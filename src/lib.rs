@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use anyhow::Ok;
 use clap::Parser;
@@ -11,8 +11,12 @@ use tracing::{debug, info};
 pub mod chrono;
 pub mod commands;
 pub mod duration;
+pub mod mediafile;
 
-use crate::commands::{ArgsBuilder, Commands};
+use crate::{
+  commands::{ArgsBuilder, Commands},
+  mediafile::MediaFile,
+};
 
 #[derive(Debug, Clone, Parser, Default)]
 #[command(version, about, long_about = None)]
@@ -79,6 +83,23 @@ pub async fn api_main(mut opts: Opts) -> anyhow::Result<()> {
       opts.program.clone(),
       opts.to_args().clone().join(" ")
     );
+    return Ok(());
+  }
+
+  if let Some(Commands::Merge {
+    mode,
+    input_dir,
+    output_dir,
+    skip_completed,
+    log_file,
+  }) = opts.action
+  {
+    info!("start");
+    let maybe_media_files = MediaFile::from_scanning(Path::new(&input_dir));
+    match maybe_media_files {
+      std::result::Result::Ok(media_files) => info!("{:?}", media_files),
+      Err(_) => (),
+    };
     return Ok(());
   }
 
