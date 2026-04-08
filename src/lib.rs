@@ -15,7 +15,7 @@ pub mod mediafile;
 
 use crate::{
   commands::{ArgsBuilder, Commands},
-  mediafile::MediaFile,
+  mediafile::{MediaFile, MediaFiles},
 };
 
 #[derive(Debug, Clone, Parser, Default)]
@@ -97,7 +97,12 @@ pub async fn api_main(mut opts: Opts) -> anyhow::Result<()> {
     info!("start");
     let maybe_media_files = MediaFile::from_scanning(Path::new(&input_dir));
     match maybe_media_files {
-      std::result::Result::Ok(media_files) => info!("{:?}", media_files),
+      std::result::Result::Ok(media_files) => {
+        let groups = MediaFiles::from_vec(media_files)
+          .sort(mediafile::MediaFileAttribute::Name)
+          .to_groups();
+        info!("{:#?}", groups);
+      }
       Err(_) => (),
     };
     return Ok(());

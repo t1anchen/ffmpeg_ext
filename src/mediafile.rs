@@ -3,6 +3,7 @@ use std::{
   fs,
   path::{Path, PathBuf},
   process::Command,
+  time::SystemTime,
 };
 
 use tracing::{debug, info};
@@ -94,5 +95,73 @@ impl MediaFile {
     }
 
     Ok(media_files)
+  }
+}
+
+pub enum MediaFileAttribute {
+  Name,
+  LastCreationTime,
+  LastModifiedTime,
+}
+
+pub struct MediaFiles {
+  files: Vec<MediaFile>,
+}
+impl MediaFiles {
+  pub fn from_vec(files: Vec<MediaFile>) -> MediaFiles {
+    MediaFiles { files }
+  }
+
+  pub fn sort(&mut self, by: MediaFileAttribute) -> &mut Self {
+    match by {
+      MediaFileAttribute::Name => self.sort_by_name(),
+      MediaFileAttribute::LastCreationTime => self.sort_by_creation_time(),
+      MediaFileAttribute::LastModifiedTime => self.sort_by_modified_time(),
+    }
+    self
+  }
+
+  fn sort_by_name(&mut self) {
+    self
+      .files
+      .sort_by_key(|mf| mf.path.to_string_lossy().to_string());
+  }
+
+  fn sort_by_creation_time(&mut self) {
+    self.files.sort_by_key(|mf| {
+      fs::metadata(&mf.path)
+        .and_then(|m| m.created())
+        .unwrap_or(SystemTime::UNIX_EPOCH)
+    });
+  }
+
+  fn sort_by_modified_time(&mut self) {
+    self.files.sort_by_key(|mf| {
+      fs::metadata(&mf.path)
+        .and_then(|m| m.modified())
+        .unwrap_or(SystemTime::UNIX_EPOCH)
+    });
+  }
+
+  pub fn to_groups(&self) -> Vec<Vec<MediaFile>> {
+    let mut groups = Vec::new();
+    let mut current_group = Vec::new();
+
+    for file in &self.files {
+      current_group.push(file.clone());
+
+      // 遇到不足1分钟的文件，闭合分组
+      if !file.is_full_segment(None) {
+        groups.push(current_group);
+        current_group = Vec::new();
+      }
+    }
+
+    // 处理最后一组（如果最后一个文件是1分钟，也单独作为一组）
+    if !current_group.is_empty() {
+      groups.push(current_group);
+    }
+
+    groups
   }
 }
