@@ -94,7 +94,6 @@ pub async fn api_main(mut opts: Opts) -> anyhow::Result<()> {
     log_file,
   }) = opts.action
   {
-    info!("start");
     let maybe_media_files = MediaFile::from_scanning(Path::new(&input_dir));
     match maybe_media_files {
       std::result::Result::Ok(media_files) => {
