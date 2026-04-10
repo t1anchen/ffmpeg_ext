@@ -6,9 +6,10 @@ use std::{
 
 use tracing::{debug, info};
 
+use crate::cli::CmdRun;
+
 pub mod chrono;
 pub mod cli;
-pub mod duration;
 pub mod mediafile;
 
 pub fn engine_run(
@@ -34,20 +35,5 @@ pub fn engine_run(
 }
 
 pub fn api_main(opts: cli::Opts) -> Result<(), Box<dyn Error>> {
-  debug!("{:?}", opts);
-
-  if opts.dryrun {
-    info!("{:?}", opts);
-    info!(
-      "{} {}",
-      opts.program.clone(),
-      opts.to_args().clone().join(" ")
-    );
-    return Ok(());
-  }
-
-  let ffmpeg_args = opts.to_args();
-  debug!("ffmpeg_args: {:?}", ffmpeg_args.clone());
-
-  Ok(())
+  opts.action.run(&opts)
 }

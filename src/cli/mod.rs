@@ -1,31 +1,24 @@
 use std::{error::Error, path::PathBuf};
 
+pub mod duration;
 pub mod merge_segments;
 pub mod scene_detect;
 pub mod split_by_time;
 
 use clap::{Parser, Subcommand};
+use duration::DurationCmd;
 use merge_segments::MergeSegmentsCmd;
 use scene_detect::SceneDetectCmd;
 use split_by_time::SplitByTimeCmd;
 
-#[derive(Debug, Clone, Parser, Default)]
+#[derive(Debug, Clone, Parser)]
 #[command(version, about, long_about = None)]
 pub struct Opts {
-  #[arg(long, default_value = "ffmpeg")]
-  pub program: String,
-
   #[arg(long, default_value = "false")]
   pub gui: bool,
 
-  #[arg(long)]
-  pub input_path: Option<PathBuf>,
-
-  #[arg(long)]
-  pub output_path: Option<PathBuf>,
-
   #[command(subcommand)]
-  pub action: Option<Feature>, // 现在引用自 commands 模块
+  pub action: Feature, // 现在引用自 commands 模块
 
   #[arg(short, long, global = true, default_value = "false")]
   pub verbose: bool,
@@ -34,41 +27,12 @@ pub struct Opts {
   pub dryrun: bool,
 }
 
-impl Opts {
-  pub fn to_args(&self) -> Vec<String> {
-    let mut args = Vec::new();
-    match self.program.as_str() {
-      "ffmpeg" => {
-        args.push("-hide_banner".into());
-        if let Some(ref p) = self.input_path {
-          args.extend(vec!["-i".into(), p.display().to_string()]);
-        }
-        if let Some(ref action) = self.action {
-          action.build_args(&mut args);
-        }
-        if let Some(ref p) = self.output_path {
-          args.push(p.display().to_string());
-        }
-      }
-      "scenedetect" => {
-        if let Some(ref p) = self.input_path {
-          args.extend(vec!["--input".into(), p.display().to_string()]);
-        }
-        if let Some(ref action) = self.action {
-          action.build_args(&mut args);
-        }
-      }
-      _ => {}
-    }
-    args
-  }
-}
-
 #[derive(Debug, Clone, Subcommand)]
 pub enum Feature {
   SceneDetect(SceneDetectCmd),
   SplitByTime(SplitByTimeCmd),
   MergeSegments(MergeSegmentsCmd),
+  Duration(DurationCmd),
 }
 
 /// 定义参数构建行为的 Trait
@@ -83,12 +47,13 @@ pub trait CmdRun {
   fn run(&self, opts: &Opts) -> Result<(), Box<dyn Error>>;
 }
 
-impl ArgsBuilder for Feature {
-  fn build_args(&self, args: &mut Vec<String>) {
+impl CmdRun for Feature {
+  fn run(&self, opts: &Opts) -> Result<(), Box<dyn Error>> {
     match self {
-      Feature::SceneDetect(cmd) => cmd.build_args(args),
-      Feature::SplitByTime(cmd) => cmd.build_args(args),
-      Feature::MergeSegments(cmd) => cmd.build_args(args),
+      Feature::SceneDetect(cmd) => cmd.run(opts),
+      Feature::SplitByTime(cmd) => cmd.run(opts),
+      Feature::MergeSegments(cmd) => cmd.run(opts),
+      Feature::Duration(cmd) => cmd.run(opts),
     }
   }
 }
