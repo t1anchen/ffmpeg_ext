@@ -35,14 +35,23 @@ mod tests {
   use crate::chrono::TimeFormatter;
   #[test]
   fn from_seconds_test() {
-    let tf = TimeFormatter::from_seconds(5025.0);
-    assert_eq!(tf.hours, 1);
-    assert_eq!(tf.minutes, 23);
-    assert_eq!(tf.seconds, 45.0);
+    {
+      let tf = TimeFormatter::from_seconds(5025.0);
+      assert_eq!(tf.hours, 1);
+      assert_eq!(tf.minutes, 23);
+      assert_eq!(tf.seconds, 45.0);
+    }
+    {
+      let tf = TimeFormatter::from_seconds(888.032000);
+      assert_eq!(tf.hours, 0);
+      assert_eq!(tf.minutes, 14);
+      assert!((tf.seconds - 48.032000).abs() < 1e-6);
+    }
   }
 
   #[test]
   fn to_secs_test() {
     assert_eq!(TimeFormatter::from_hhmmss(1, 23, 45.0).to_secs(), 5025.0);
+    assert!((TimeFormatter::from_hhmmss(0, 14, 48.032000).to_secs() - 888.032000).abs() < 1e-6);
   }
 }
