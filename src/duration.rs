@@ -1,6 +1,4 @@
-use std::path::Path;
-
-use crate::Opts;
+use crate::cli::Opts;
 
 pub struct Duration {
   opts: Opts,
@@ -18,7 +16,7 @@ impl From<Opts> for Duration {
 
 #[cfg(test)]
 mod tests {
-  use crate::{Opts, duration::Duration};
+  use crate::{cli::Opts, duration::Duration};
 
   fn gen_stub_opts() -> Opts {
     Opts {
