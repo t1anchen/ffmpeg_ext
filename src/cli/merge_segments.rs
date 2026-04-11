@@ -37,6 +37,7 @@ impl ArgsBuilder for MergeSegmentsCmd {}
 
 impl CmdRun for MergeSegmentsCmd {
   fn run(&self, opts: &Opts) -> Result<(), Box<dyn Error>> {
+    // scan and grouping
     let maybe_media_files =
       MediaFile::from_scanning(Path::new(&self.input_dir));
     match maybe_media_files {
@@ -45,6 +46,11 @@ impl CmdRun for MergeSegmentsCmd {
           .sort(MediaFileAttribute::Name)
           .to_groups();
         info!("{:#?}", groups);
+        // merging
+        for (i, group) in groups.into_iter().enumerate() {
+          let group_idx = i+1;
+
+        }
       }
       Err(_) => (),
     };

@@ -143,25 +143,51 @@ impl MediaFiles {
     });
   }
 
-  pub fn to_groups(&self) -> Vec<Vec<MediaFile>> {
-    let mut groups = Vec::new();
-    let mut current_group = Vec::new();
+  pub fn to_groups(&self) -> Vec<MediaFileGroup> {
+    let mut groups: Vec<MediaFileGroup> = Vec::new();
+    let mut current_group: Vec<MediaFile> = Vec::new();
 
     for file in &self.files {
       current_group.push(file.clone());
 
       // 遇到不足1分钟的文件，闭合分组
       if !file.is_full_segment(None) {
-        groups.push(current_group);
+        groups.push(MediaFileGroup {
+          files: current_group,
+        });
         current_group = Vec::new();
       }
     }
 
     // 处理最后一组（如果最后一个文件是1分钟，也单独作为一组）
     if !current_group.is_empty() {
-      groups.push(current_group);
+      groups.push(MediaFileGroup {
+        files: current_group,
+      });
     }
 
     groups
+  }
+}
+
+#[derive(Debug)]
+pub struct MediaFileGroup {
+  files: Vec<MediaFile>,
+}
+
+impl MediaFileGroup {
+  fn the_earlist(&self) -> Option<&MediaFile> {
+    self.files.first()
+  }
+  fn the_latest(&self) -> Option<&MediaFile> {
+    self.files.last()
+  }
+  fn common_prefix(&self) -> Option<String> {
+    if let (Some(earlist), Some(latest)) =
+      (self.the_earlist(), self.the_latest())
+    {
+
+    }
+    None
   }
 }
