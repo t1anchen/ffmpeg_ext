@@ -48,8 +48,7 @@ impl CmdRun for MergeSegmentsCmd {
         info!("{:#?}", groups);
         // merging
         for (i, group) in groups.into_iter().enumerate() {
-          let group_idx = i+1;
-
+          let group_idx = i + 1;
         }
       }
       Err(_) => (),

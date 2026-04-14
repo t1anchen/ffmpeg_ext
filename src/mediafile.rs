@@ -13,6 +13,9 @@ pub struct MediaFile {
   path: PathBuf,
   duration_in_secs: u32,
   size_in_mb: f64,
+  name: String,
+  last_created: Option<SystemTime>,
+  last_modified: Option<SystemTime>,
 }
 
 impl MediaFile {
@@ -85,11 +88,23 @@ impl MediaFile {
       {
         let size_in_mb = MediaFile::get_size_mb(&path)?;
         let duration_in_secs = MediaFile::get_duration_in_secs(&path)?;
+        let name = path
+          .file_stem()
+          .and_then(|os_str| os_str.to_str())
+          .map(|s| s.to_string())
+          .unwrap();
+
+        let metadata = fs::metadata(&path)?;
+        let last_modified = metadata.modified().ok();
+        let last_created = metadata.created().ok();
 
         media_files.push(MediaFile {
           path,
           duration_in_secs,
           size_in_mb,
+          name,
+          last_created,
+          last_modified,
         });
       }
     }
@@ -98,6 +113,7 @@ impl MediaFile {
   }
 }
 
+#[derive(Debug, Clone)]
 pub enum MediaFileAttribute {
   Name,
   LastCreationTime,
@@ -152,18 +168,14 @@ impl MediaFiles {
 
       // 遇到不足1分钟的文件，闭合分组
       if !file.is_full_segment(None) {
-        groups.push(MediaFileGroup {
-          files: current_group,
-        });
+        groups.push(MediaFileGroup::from_vec(current_group));
         current_group = Vec::new();
       }
     }
 
     // 处理最后一组（如果最后一个文件是1分钟，也单独作为一组）
     if !current_group.is_empty() {
-      groups.push(MediaFileGroup {
-        files: current_group,
-      });
+      groups.push(MediaFileGroup::from_vec(current_group));
     }
 
     groups
@@ -173,21 +185,54 @@ impl MediaFiles {
 #[derive(Debug)]
 pub struct MediaFileGroup {
   files: Vec<MediaFile>,
+  name: String,
 }
 
 impl MediaFileGroup {
+  pub fn from_vec(files: Vec<MediaFile>) -> MediaFileGroup {
+    let mut group = MediaFileGroup {
+      files,
+      name: "Untitled".into(),
+    };
+    group.name = group.new_name();
+    group
+  }
   fn the_earlist(&self) -> Option<&MediaFile> {
     self.files.first()
   }
   fn the_latest(&self) -> Option<&MediaFile> {
     self.files.last()
   }
-  fn common_prefix(&self) -> Option<String> {
+  pub fn diff3_names<'a>(
+    s1: &'a str,
+    s2: &'a str,
+  ) -> (&'a str, &'a str, &'a str) {
+    // 1. Find the first byte index where they differ
+    let divergence_idx = s1
+      .char_indices()
+      .zip(s2.chars())
+      .take_while(|((_, c1), c2)| c1 == c2)
+      .map(|((idx, c), _)| idx + c.len_utf8())
+      .last()
+      .unwrap_or(0);
+
+    // 2. Slice the original strings based on that index
+    let prefix = &s1[..divergence_idx];
+    let rem1 = &s1[divergence_idx..];
+    let rem2 = &s2[divergence_idx..];
+
+    (prefix, rem1, rem2)
+  }
+  pub fn new_name(&self) -> String {
     if let (Some(earlist), Some(latest)) =
       (self.the_earlist(), self.the_latest())
     {
-
+      let s1 = &earlist.name;
+      let s2 = &latest.name;
+      let (common_prefix, earlist_part, latest_part) =
+        MediaFileGroup::diff3_names(s1, s2);
+      return format!("{}-{}--{}", common_prefix, earlist_part, latest_part);
     }
-    None
+    "Untitle".into()
   }
 }
