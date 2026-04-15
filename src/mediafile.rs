@@ -186,8 +186,8 @@ impl MediaFiles {
 
 #[derive(Debug)]
 pub struct MediaFileGroup {
-  files: Vec<MediaFile>,
-  name: String,
+  pub files: Vec<MediaFile>,
+  pub name: String,
 }
 
 impl MediaFileGroup {

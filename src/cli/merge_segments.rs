@@ -49,6 +49,10 @@ impl CmdRun for MergeSegmentsCmd {
         // merging
         for (i, group) in groups.into_iter().enumerate() {
           let group_idx = i + 1;
+          let output_filename = format!("{}.mp4", &group.name);
+          let output_path = Path::new(&self.output_dir).join(output_filename);
+
+          
         }
       }
       Err(_) => (),
