@@ -5,6 +5,7 @@ authors = ["au9ustine <austin.shao@outlook.com>"]
 edition = "2024"
 
 [dependencies]
+chrono = "0.4.44"
 # cli
 clap = { version = "4", features = ["derive"]}
 # logging

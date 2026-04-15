@@ -8,6 +8,8 @@ use std::{
 
 use tracing::{debug, info};
 
+use crate::datetime::SimpleDateTime;
+
 #[derive(Debug, Clone)]
 pub struct MediaFile {
   path: PathBuf,
@@ -203,7 +205,25 @@ impl MediaFileGroup {
   fn the_latest(&self) -> Option<&MediaFile> {
     self.files.last()
   }
-  pub fn diff3_names<'a>(
+  pub fn diff3_try_from_date_strs<'a>(
+    s1: &'a str,
+    s2: &'a str,
+  ) -> (&'a str, &'a str, &'a str, &'a str) {
+    let (common_prefix, s1_uniq, s2_uniq) = Self::diff3_from_strs(s1, s2);
+    if s1.len() >= 14 && s2.len() >= 14 {
+      if SimpleDateTime::from_str("%Y%m%d%H%M%S", &s1[..14], 8.0).is_some()
+        && SimpleDateTime::from_str("%Y%m%d%H%M%S", &s2[..14], 8.0).is_some()
+      {
+        return match common_prefix.len() {
+          0..8 => ("", &s1[..14], &s2[..14], "p0800"), // not same day
+          8..14 => (&s1[..8], &s1[8..], &s2[8..], "p0800"), // same day
+          _ => (common_prefix, s1_uniq, s2_uniq, "p0800"),
+        };
+      }
+    }
+    (common_prefix, s1_uniq, s2_uniq, "")
+  }
+  pub fn diff3_from_strs<'a>(
     s1: &'a str,
     s2: &'a str,
   ) -> (&'a str, &'a str, &'a str) {
@@ -229,9 +249,15 @@ impl MediaFileGroup {
     {
       let s1 = &earlist.name;
       let s2 = &latest.name;
-      let (common_prefix, earlist_part, latest_part) =
-        MediaFileGroup::diff3_names(s1, s2);
-      return format!("{}-{}--{}", common_prefix, earlist_part, latest_part);
+      let (common_prefix, earlist_part, latest_part, common_suffix) =
+        MediaFileGroup::diff3_try_from_date_strs(s1, s2);
+      return match common_prefix.len() {
+        0 => format!("{}--{}-{}", earlist_part, latest_part, common_suffix),
+        _ => format!(
+          "{}-{}--{}-{}",
+          common_prefix, earlist_part, latest_part, common_suffix
+        ),
+      };
     }
     "Untitle".into()
   }

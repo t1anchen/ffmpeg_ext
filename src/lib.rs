@@ -8,7 +8,7 @@ use tracing::{debug, info};
 
 use crate::cli::CmdRun;
 
-pub mod chrono;
+pub mod datetime;
 pub mod cli;
 pub mod mediafile;
 

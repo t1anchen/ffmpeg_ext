@@ -41,7 +41,7 @@ impl CmdRun for MergeSegmentsCmd {
     let maybe_media_files =
       MediaFile::from_scanning(Path::new(&self.input_dir));
     match maybe_media_files {
-      std::result::Result::Ok(media_files) => {
+      Ok(media_files) => {
         let groups = MediaFiles::from_vec(media_files)
           .sort(MediaFileAttribute::Name)
           .to_groups();
