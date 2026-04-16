@@ -4,7 +4,7 @@ use clap::Parser;
 use tracing::info;
 
 use crate::{
-  cli::{ArgsBuilder, CmdRun, Opts},
+  cli::{ArgsBuilder, CmdRun, Opts, merge_segments},
   mediafile::{MediaFile, MediaFileAttribute, MediaFiles},
 };
 
@@ -52,7 +52,11 @@ impl CmdRun for MergeSegmentsCmd {
           let output_filename = format!("{}.mp4", &group.name);
           let output_path = Path::new(&self.output_dir).join(output_filename);
 
-          
+          if self.skip_completed && output_path.exists() {
+            continue;
+          }
+
+
         }
       }
       Err(_) => (),
