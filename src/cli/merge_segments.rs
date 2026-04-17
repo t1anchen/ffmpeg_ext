@@ -51,12 +51,11 @@ impl CmdRun for MergeSegmentsCmd {
           let group_idx = i + 1;
           let output_filename = format!("{}.mp4", &group.name);
           let output_path = Path::new(&self.output_dir).join(output_filename);
+          let input_filelist = Path::new(&group.to_filelist()?);
 
           if self.skip_completed && output_path.exists() {
             continue;
           }
-
-
         }
       }
       Err(_) => (),

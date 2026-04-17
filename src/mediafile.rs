@@ -1,12 +1,14 @@
 use std::{
   error::Error,
   fs,
+  io::{BufWriter, Write},
   path::{Path, PathBuf},
   process::Command,
   time::SystemTime,
 };
 
 use tracing::{debug, info};
+use tracing_subscriber::fmt::format;
 
 use crate::datetime::SimpleDateTime;
 
@@ -210,10 +212,11 @@ impl MediaFileGroup {
     s2: &'a str,
   ) -> (&'a str, &'a str, &'a str, &'a str) {
     let (common_prefix, s1_uniq, s2_uniq) = Self::diff3_from_strs(s1, s2);
+    let is_valid_datetime = |s: &str| {
+      SimpleDateTime::from_str("%Y%m%d%H%M%S", &s[..14], 8.0).is_some()
+    };
     if s1.len() >= 14 && s2.len() >= 14 {
-      if SimpleDateTime::from_str("%Y%m%d%H%M%S", &s1[..14], 8.0).is_some()
-        && SimpleDateTime::from_str("%Y%m%d%H%M%S", &s2[..14], 8.0).is_some()
-      {
+      if is_valid_datetime(s1) && is_valid_datetime(s2) {
         return match common_prefix.len() {
           0..8 => ("", &s1[..14], &s2[..14], "p0800"), // not same day
           8..14 => (&s1[..8], &s1[8..], &s2[8..], "p0800"), // same day
@@ -260,5 +263,21 @@ impl MediaFileGroup {
       };
     }
     "Untitle".into()
+  }
+
+  pub fn to_filelist(&self) -> Result<PathBuf, Box<dyn Error>> {
+    let filelist_filename = format!("{}.txt", self.name);
+    let filelist_path = Path::new(&filelist_filename);
+    let filelist_file = std::fs::File::create(filelist_path)?;
+    let mut writer = BufWriter::new(filelist_file);
+
+    for media_file in self.files.iter() {
+      let row = format!(
+        "file '{}'",
+        media_file.path.display().to_string().replace('\\', "/")
+      );
+      writeln!(writer, "{}", row)?;
+    }
+    Ok(filelist_path.to_path_buf())
   }
 }
