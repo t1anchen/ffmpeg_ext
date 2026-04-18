@@ -1,13 +1,14 @@
 use std::{
   error::Error,
-  fs,
+  fs::{self, File, FileTimes},
   io::{BufWriter, Write},
+  os::windows::fs::FileTimesExt,
   path::{Path, PathBuf},
-  process::Command,
+  process::{Command, Stdio},
   time::SystemTime,
 };
 
-use tracing::{debug, info};
+use tracing::{debug, error, info};
 use tracing_subscriber::fmt::format;
 
 use crate::datetime::SimpleDateTime;
@@ -198,6 +199,7 @@ impl MediaFileGroup {
       files,
       name: "Untitled".into(),
     };
+    // TODO: sort by conditions: timestamp or name
     group.name = group.new_name();
     group
   }
@@ -279,5 +281,74 @@ impl MediaFileGroup {
       writeln!(writer, "{}", row)?;
     }
     Ok(filelist_path.to_path_buf())
+  }
+
+  pub fn merge(&self, output_path: &Path) -> Result<(), Box<dyn Error>> {
+    let input_filelist = self.to_filelist()?;
+
+    // construct command
+    let mut cmd = Command::new("ffmpeg");
+    cmd
+      .args([
+        "-f",
+        "concat",
+        "-safe",
+        "0",
+        "-i",
+        input_filelist.to_str().unwrap(),
+        "-c",
+        "copy",
+        "-y",
+        output_path.to_str().unwrap(),
+      ])
+      .stdout(Stdio::piped())
+      .stderr(Stdio::piped());
+
+    // send to ffmpeg to execute
+    let proc = cmd.spawn()?;
+    let output = proc.wait_with_output()?;
+
+    // execute result
+    let _ = fs::remove_file(input_filelist.as_path());
+    if !output.status.success() {
+      let err = String::from_utf8_lossy(&output.stderr);
+      error!("ffmpeg failed: {}", err);
+      return Err(format!("ffmpeg failed and return {}", output.status).into());
+    }
+
+    // last modified
+    let now = SystemTime::now();
+    let output_file = fs::OpenOptions::new().write(true).open(output_path)?;
+    let mut timestamp = FileTimes::new();
+    if let Some(last_modified_from_latest) =
+      self.the_latest().and_then(|latest| {
+        fs::metadata(latest.path.as_path())
+          .and_then(|m| m.modified())
+          .ok()
+      })
+    {
+      timestamp = timestamp.set_modified(last_modified_from_latest);
+    } else {
+      timestamp = timestamp.set_modified(now);
+    }
+
+    #[cfg(windows)]
+    {
+      if let Some(last_created_from_earlist) =
+        self.the_earlist().and_then(|earlist| {
+          fs::metadata(earlist.path.as_path())
+            .and_then(|m| m.created())
+            .ok()
+        })
+      {
+        timestamp = timestamp.set_created(last_created_from_earlist);
+      } else {
+        timestamp = timestamp.set_created(now);
+      }
+    }
+
+    output_file.set_times(timestamp)?;
+
+    Ok(())
   }
 }

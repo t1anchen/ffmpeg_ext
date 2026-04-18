@@ -1,7 +1,7 @@
 use std::{error::Error, path::Path};
 
 use clap::Parser;
-use tracing::info;
+use tracing::{error, info};
 
 use crate::{
   cli::{ArgsBuilder, CmdRun, Opts, merge_segments},
@@ -17,11 +17,11 @@ pub struct MergeSegmentsCmd {
   mode: String,
 
   /// 媒体文件目录
-  #[arg(short, long, default_value = "/home/xxx/media/")]
+  #[arg(short, long, required = true)]
   input_dir: String,
 
   /// 输出目录
-  #[arg(short, long, default_value = "./output/")]
+  #[arg(short, long, required = true)]
   output_dir: String,
 
   /// 跳过已完成的合并任务
@@ -51,10 +51,28 @@ impl CmdRun for MergeSegmentsCmd {
           let group_idx = i + 1;
           let output_filename = format!("{}.mp4", &group.name);
           let output_path = Path::new(&self.output_dir).join(output_filename);
-          let input_filelist = Path::new(&group.to_filelist()?);
 
           if self.skip_completed && output_path.exists() {
+            info!("{} skipped", output_path.display());
             continue;
+          }
+
+          match group.merge(&output_path) {
+            Ok(_) => {
+              info!(
+                "group {} merge at {} succeed",
+                group_idx,
+                output_path.display()
+              );
+            }
+            Err(e) => {
+              error!(
+                "group {} merge at {} failed due to: {}",
+                group_idx,
+                output_path.display(),
+                e
+              );
+            }
           }
         }
       }
