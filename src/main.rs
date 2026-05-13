@@ -11,11 +11,12 @@ fn main() -> Result<(), Box<dyn Error>> {
   tracing_subscriber::fmt::init();
 
   let opts: cli::Opts = cli::Opts::parse();
+  let is_quiet = opts.quiet;
 
   let start = std::time::Instant::now();
-  let _ = api_main(opts.clone());
+  let _ = api_main(opts);
   let elapsed = start.elapsed();
-  if !opts.clone().quiet {
+  if !is_quiet {
     info!("elapsed: {:?}", elapsed);
   }
 
