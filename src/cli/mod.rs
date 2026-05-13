@@ -20,10 +20,13 @@ pub struct Opts {
   #[command(subcommand)]
   pub action: Feature, // 现在引用自 commands 模块
 
-  #[arg(short, long, global = true, default_value = "false")]
+  #[arg(short, long, global = true)]
   pub verbose: bool,
 
-  #[arg(long, global = true, default_value = "false")]
+  #[arg(short, long, global = true)]
+  pub quiet: bool,
+
+  #[arg(long, global = true)]
   pub dryrun: bool,
 }
 

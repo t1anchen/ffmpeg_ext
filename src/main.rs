@@ -13,9 +13,11 @@ fn main() -> Result<(), Box<dyn Error>> {
   let opts: cli::Opts = cli::Opts::parse();
 
   let start = std::time::Instant::now();
-  let _ = api_main(opts);
+  let _ = api_main(opts.clone());
   let elapsed = start.elapsed();
-  info!("elapsed: {:?}", elapsed);
+  if !opts.clone().quiet {
+    info!("elapsed: {:?}", elapsed);
+  }
 
   Ok(())
 }
